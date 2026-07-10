@@ -111,15 +111,26 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "nome and email are required" }, { status: 400 })
         }
 
+        // Antes de tentar gravar, valide duplicidade também quando a API do Google Sheets falhar
+        // (nesse caso o fluxo vai para Apps Script).
+        const fallbackResult = await forwardToAppsScript(payload).catch(async (err: any) => {
+            // Não alteramos comportamento do fallback; só reprocessamos erro aqui.
+            throw err
+        })
+        if (fallbackResult && typeof fallbackResult === "object" && (fallbackResult as any).error) {
+            return NextResponse.json({ error: (fallbackResult as any).error }, { status: 409 })
+        }
+
+        // Se chegou aqui, tentamos também persistir via Sheets diretamente.
         let sheets
         try {
             sheets = await getSheetsClient()
         } catch (e: any) {
             const msg = e?.message || String(e)
             console.warn("Google Sheets API unavailable, falling back to Apps Script", msg)
-            const fallbackResult = await forwardToAppsScript(payload)
             return NextResponse.json({ ok: true, via: "apps-script", ...fallbackResult })
         }
+
 
         // Order: Data, Nome, E-mail, WhatsApp, CPF, Profissão, Cidade, Motivação, Como conheceu
         const values = [[new Date().toISOString(), nome, email, payload.whatsapp, payload.cpf, payload.profissao, payload.cidade, payload.motivacao, payload.indicacao]]
