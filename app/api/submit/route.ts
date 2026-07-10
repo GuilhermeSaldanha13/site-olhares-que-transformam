@@ -6,6 +6,31 @@ export const runtime = "nodejs"
 // Spreadsheet ID (default to the one provided by the user)
 const SPREADSHEET_ID = process.env.GOOGLE_SPREADSHEET_ID || "1FdT0BsJ37IVQkdaWagCC9Qs2Z3I-ADw4u-7gmbvnk08"
 
+function buildSubmissionPayload(data: Record<string, unknown>) {
+    const nome = (data.nome || data.name || "").toString()
+    const email = (data.email || "").toString()
+    const whatsapp = (data.whatsapp || data.phone || "").toString()
+    const cpf = (data.cpf || "").toString()
+    const profissao = (data.profissao || "").toString()
+    const cidade = (data.cidade || "").toString()
+    const motivacao = (data.motivacao || data.message || "").toString()
+    const indicacao = (data.indicacao || "").toString()
+
+    return {
+        nome,
+        email,
+        whatsapp,
+        cpf,
+        profissao,
+        cidade,
+        motivacao,
+        indicacao,
+        name: nome,
+        phone: whatsapp,
+        message: motivacao,
+    }
+}
+
 function parseServiceAccountJson(raw?: string) {
     if (!raw) throw new Error("Missing GOOGLE_SERVICE_ACCOUNT_JSON environment variable")
 
@@ -47,18 +72,40 @@ async function getSheetsClient() {
     return google.sheets({ version: "v4", auth })
 }
 
+async function forwardToAppsScript(payload: Record<string, unknown>) {
+    const submitUrl = process.env.GOOGLE_APPS_SCRIPT_URL || process.env.NEXT_PUBLIC_SUBMIT_URL
+    if (!submitUrl) {
+        throw new Error("No Google Sheets destination configured. Set GOOGLE_SERVICE_ACCOUNT_JSON or GOOGLE_APPS_SCRIPT_URL/NEXT_PUBLIC_SUBMIT_URL.")
+    }
+
+    const response = await fetch(submitUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+    })
+
+    const text = await response.text()
+    let parsed: any = null
+    try {
+        parsed = JSON.parse(text)
+    } catch {
+        parsed = null
+    }
+
+    if (!response.ok) {
+        const detail = parsed?.error || text || response.statusText
+        throw new Error(detail || `Google Apps Script request failed with status ${response.status}`)
+    }
+
+    return parsed || { ok: true }
+}
+
 export async function POST(req: Request) {
     try {
         const data = await req.json()
-        // Accept both English and Portuguese keys
-        const nome = (data.nome || data.name || "").toString()
-        const email = (data.email || "").toString()
-        const whatsapp = (data.whatsapp || data.phone || "").toString()
-        const cpf = (data.cpf || "").toString()
-        const profissao = (data.profissao || "").toString()
-        const cidade = (data.cidade || "").toString()
-        const motivacao = (data.motivacao || data.message || "").toString()
-        const indicacao = (data.indicacao || "").toString()
+        const payload = buildSubmissionPayload(data)
+        const nome = payload.nome.toString()
+        const email = payload.email.toString()
 
         if (!nome || !email) {
             return NextResponse.json({ error: "nome and email are required" }, { status: 400 })
@@ -69,17 +116,13 @@ export async function POST(req: Request) {
             sheets = await getSheetsClient()
         } catch (e: any) {
             const msg = e?.message || String(e)
-            if (msg.includes('Missing GOOGLE_SERVICE_ACCOUNT_JSON')) {
-                return NextResponse.json({
-                    error:
-                        'GOOGLE_SERVICE_ACCOUNT_JSON is not set. Either set GOOGLE_SERVICE_ACCOUNT_JSON to use server-side Sheets access, or deploy a Google Apps Script Web App and set NEXT_PUBLIC_SUBMIT_URL in your .env to point the client directly to it.'
-                }, { status: 400 })
-            }
-            throw e
+            console.warn("Google Sheets API unavailable, falling back to Apps Script", msg)
+            const fallbackResult = await forwardToAppsScript(payload)
+            return NextResponse.json({ ok: true, via: "apps-script", ...fallbackResult })
         }
 
         // Order: Data, Nome, E-mail, WhatsApp, CPF, Profissão, Cidade, Motivação, Como conheceu
-        const values = [[new Date().toISOString(), nome, email, whatsapp, cpf, profissao, cidade, motivacao, indicacao]]
+        const values = [[new Date().toISOString(), nome, email, payload.whatsapp, payload.cpf, payload.profissao, payload.cidade, payload.motivacao, payload.indicacao]]
 
         // Check for duplicate by email (column C). Skip header row (start at C2).
         try {
@@ -93,7 +136,7 @@ export async function POST(req: Request) {
             }
         } catch (e) {
             // ignore read errors and proceed to append
-            console.warn('Could not read existing emails for duplicate check', e)
+            console.warn("Could not read existing emails for duplicate check", e)
         }
 
         // Append to sheet columns A:I

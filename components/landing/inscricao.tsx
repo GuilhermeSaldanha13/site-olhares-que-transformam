@@ -15,7 +15,7 @@ export function Inscricao() {
         e.preventDefault()
         setStatus("sending")
         try {
-            const submitUrl = (process.env.NEXT_PUBLIC_SUBMIT_URL as string) || "/api/submit"
+            const submitUrl = "/api/submit"
             // Build payload including both Portuguese keys (for Apps Script) and English keys (for internal API)
             const payload: Record<string, any> = {
                 // English keys
