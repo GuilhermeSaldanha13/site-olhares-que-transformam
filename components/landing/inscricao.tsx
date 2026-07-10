@@ -31,7 +31,7 @@ export function Inscricao() {
             }
 
             // Enviar via WhatsApp
-            const whatsappNumber = "51599128542" // 55 + DDD + número sem "+" e sem espaços
+            const whatsappNumber = "555199128542" // formato internacional sem + e sem espaços: 55 + DDD + número
             const message = [
                 "Nova inscrição — Olhares que Transformam",
                 `Nome: ${values.name}`,
