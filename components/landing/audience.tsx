@@ -1,6 +1,6 @@
 const audience = [
   "Professoras da Educação Infantil",
-  "Auxiliares de sala",
+  "Auxiliares de sala de aula",
   "Monitores",
   "Coordenadores pedagógicos",
   "Supervisores escolares",
