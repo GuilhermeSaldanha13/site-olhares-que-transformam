@@ -125,19 +125,49 @@ export async function POST(req: Request) {
         const values = [[new Date().toISOString(), nome, email, payload.whatsapp, payload.cpf, payload.profissao, payload.cidade, payload.motivacao, payload.indicacao]]
 
         // Check for duplicate by email (column C). Skip header row (start at C2).
+        // If Google Sheets is missing/unstable, we fallback to Apps Script; but here we are in Sheets mode.
         try {
             const existingRes = await sheets.spreadsheets.values.get({
                 spreadsheetId: SPREADSHEET_ID,
                 range: "Sheet1!C2:C",
             })
-            const existingValues: string[] = (existingRes.data.values || []).flat().map((v: any) => (v || "").toString().trim().toLowerCase())
-            if (email && existingValues.includes(email.trim().toLowerCase())) {
-                return NextResponse.json({ error: "email already registered" }, { status: 409 })
+            const existingValues: string[] = (existingRes.data.values || [])
+                .flat()
+                .map((v: any) => (v || "").toString().trim().toLowerCase())
+
+            if (email) {
+                const emailNorm = email.trim().toLowerCase()
+                if (existingValues.includes(emailNorm)) {
+                    return NextResponse.json({ error: "email already registered" }, { status: 409 })
+                }
             }
         } catch (e) {
             // ignore read errors and proceed to append
             console.warn("Could not read existing emails for duplicate check", e)
         }
+
+        // Extra guard: if CPF is provided, also block duplicates by CPF.
+        // CPF is stored in column E (see values append order: A..I: Data, Nome, E-mail, WhatsApp, CPF, Profissão, Cidade, Motivação, Como conheceu)
+        const cpf = payload.cpf?.toString().trim()
+        if (cpf) {
+            try {
+                const cpfRes = await sheets.spreadsheets.values.get({
+                    spreadsheetId: SPREADSHEET_ID,
+                    range: "Sheet1!E2:E",
+                })
+                const existingCpfs: string[] = (cpfRes.data.values || [])
+                    .flat()
+                    .map((v: any) => (v || "").toString().trim().toLowerCase())
+
+                const cpfNorm = cpf.toLowerCase()
+                if (existingCpfs.includes(cpfNorm)) {
+                    return NextResponse.json({ error: "cpf already registered" }, { status: 409 })
+                }
+            } catch (e) {
+                console.warn("Could not read existing cpfs for duplicate check", e)
+            }
+        }
+
 
         // Append to sheet columns A:I
         await sheets.spreadsheets.values.append({
