@@ -30,24 +30,24 @@ export function Inscricao() {
                 motivacao: values.motivacao,
             }
 
-            const res = await fetch(submitUrl, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
-            })
-            if (res.ok) {
-                setStatus("ok")
-                setValues({ name: "", email: "", whatsapp: "", cpf: "", profissao: "", cidade: "", motivacao: "" })
-            } else {
-                let msg = ""
-                try {
-                    const json = await res.json()
-                    msg = json?.error || JSON.stringify(json)
-                } catch (e) {
-                    try { msg = await res.text() } catch (e2) { msg = String(e2) }
-                }
-                setStatus(`error: ${msg}`)
-            }
+            // Enviar via WhatsApp
+            const whatsappNumber = "51599128542" // 55 + DDD + número sem "+" e sem espaços
+            const message = [
+                "Nova inscrição — Olhares que Transformam",
+                `Nome: ${values.name}`,
+                `E-mail: ${values.email}`,
+                `WhatsApp: ${values.whatsapp || "(não informado)"}`,
+                `CPF: ${values.cpf}`,
+                `Profissão: ${values.profissao || "(não informada)"}`,
+                `Cidade: ${values.cidade || "(não informada)"}`,
+                `Motivação: ${values.motivacao || "(não informada)"}`,
+            ].join("\n")
+
+            const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`
+            window.open(url, "_blank", "noopener,noreferrer")
+
+            setStatus("ok")
+            setValues({ name: "", email: "", whatsapp: "", cpf: "", profissao: "", cidade: "", motivacao: "" })
         } catch (err) {
             setStatus("error")
         }
@@ -100,9 +100,9 @@ export function Inscricao() {
 
                     <div className="mt-4 flex items-center gap-3">
                         <Button type="submit">Enviar inscrição</Button>
-                        {status === "sending" && <span className="text-sm text-muted-foreground">Enviando...</span>}
-                        {status === "ok" && <span className="text-sm text-success">Inscrição enviada — obrigado!</span>}
-                        {status && status.toString().startsWith("error") && <span className="text-sm text-destructive">Erro ao enviar</span>}
+                        {status === "sending" && <span className="text-sm text-muted-foreground">Abrindo WhatsApp...</span>}
+                        {status === "ok" && <span className="text-sm text-success">WhatsApp aberto — confira sua mensagem.</span>}
+                        {status && status.toString().startsWith("error") && <span className="text-sm text-destructive">Erro ao abrir o WhatsApp</span>}
                     </div>
                 </form>
             </div>
