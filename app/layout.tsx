@@ -1,4 +1,4 @@
-import { Analytics } from '@vercel/analytics/next'
+: import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Fraunces, Inter, Parisienne } from 'next/font/google'
 import './globals.css'
@@ -31,8 +31,19 @@ export const metadata: Metadata = {
     // Browsers/cache-friendly
     icon: [
       {
-        url: '/favicon.png',
-        sizes: 'any',
+        url: '/favicon-32x32.png',
+        sizes: '32x32',
+        type: 'image/png',
+      },
+      {
+        url: '/favicon-192x192.png',
+        sizes: '192x192',
+        type: 'image/png',
+      },
+      {
+        url: '/favicon-512x512.png',
+        sizes: '512x512',
+        type: 'image/png',
       },
       {
         url: '/icon.svg',
@@ -41,21 +52,26 @@ export const metadata: Metadata = {
       },
     ],
     apple: {
-      url: '/favicon.png',
-      sizes: 'any',
+      url: '/apple-touch-icon.png',
+      sizes: '180x180',
     },
     shortcut: {
-      url: '/favicon.png',
+      url: '/favicon.ico',
       sizes: 'any',
     },
   },
 }
 
 
+
 export const viewport: Viewport = {
   colorScheme: 'light',
   themeColor: '#faf6ee',
 }
+
+// Extra hardening for favicon in some browsers/cases
+// (Next metadata usually handles this, but we also provide explicit tags.)
+
 
 export default function RootLayout({
   children,
@@ -64,6 +80,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" className={`light ${inter.variable} ${fraunces.variable} bg-background`}>
+      <head>
+        <link rel="icon" href="/favicon-32x32.png" sizes="32x32" />
+        <link rel="icon" href="/favicon-192x192.png" sizes="192x192" />
+        <link rel="icon" href="/favicon-512x512.png" sizes="512x512" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+        <link rel="shortcut icon" href="/favicon.ico" />
+      </head>
       <body className="font-sans antialiased">
         {children}
         {process.env.NODE_ENV === 'production' && <Analytics />}
@@ -71,3 +94,4 @@ export default function RootLayout({
     </html>
   )
 }
+
