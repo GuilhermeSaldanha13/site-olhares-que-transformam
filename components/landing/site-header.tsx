@@ -24,14 +24,14 @@ export function SiteHeader() {
             Conteúdo
           </a>
           <a href="#instrutora" className="transition-colors hover:text-foreground">
-            Instrutora
+            Especialista
           </a>
           <a href="#duvidas" className="transition-colors hover:text-foreground">
             Dúvidas
           </a>
         </nav>
 
-        <Button asChild className="rounded-full px-5">
+        <Button asChild className="rounded-full px-4 py-2 text-sm">
           <a href="#inscricao">Garantir vaga</a>
         </Button>
       </div>
