@@ -1,14 +1,14 @@
 import Image from "next/image"
-import { Button } from "@/components/ui/button"
+
 
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 border-b border-border/60 bg-background/85 backdrop-blur-md">
-      <div className="mx-auto flex h-32 w-full max-w-6xl items-center justify-between px-5 sm:px-8 md:h-36">
-        <a href="#inicio" className="flex items-center" aria-label="Shirlei Saldanha - início">
+      <div className="mx-auto w-full max-w-6xl px-5 sm:px-8">
+        <a href="#inicio" className="flex items-center justify-center py-4" aria-label="Shirlei Saldanha - início">
           <Image
-            src="/logo-shirlei.png"
-            alt="Shirlei Saldanha - Neuropsicologia e Psicologia Clínica"
+            src="/Logo.png"
+            alt="Logo"
             width={520}
             height={186}
             priority
@@ -16,7 +16,7 @@ export function SiteHeader() {
           />
         </a>
 
-        <nav className="hidden items-center gap-7 text-sm text-muted-foreground md:flex">
+        <nav className="flex flex-col items-center gap-1 pb-2 text-sm text-muted-foreground md:flex-row md:items-center md:justify-center md:gap-2" aria-label="Navegação principal">
           <a href="#formacao" className="transition-colors hover:text-foreground">
             A formação
           </a>
@@ -30,10 +30,6 @@ export function SiteHeader() {
             Dúvidas
           </a>
         </nav>
-
-        <Button asChild className="rounded-full px-4 py-2 text-sm">
-          <a href="#inscricao">Garantir vaga</a>
-        </Button>
       </div>
     </header>
   )

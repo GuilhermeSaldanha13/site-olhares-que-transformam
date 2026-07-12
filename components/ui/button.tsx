@@ -47,7 +47,7 @@ function Button({
   size = 'default',
   children,
   ...props
-}: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
+}: ButtonPrimitive.Props & VariantProps<typeof buttonVariants> & { asChild?: boolean }) {
   // Extract asChild so it's not passed down to DOM elements accidentally
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { asChild, ...rest }: any = props
@@ -56,7 +56,7 @@ function Button({
 
   // If asChild is true and children is a valid React element, clone it and merge classes/props
   if (asChild && isValidElement(children)) {
-    const child = Children.only(children) as React.ReactElement
+    const child = Children.only(children) as React.ReactElement<{ className?: string }>
     const childClass = child.props.className ? `${child.props.className} ${classes}` : classes
     const mergedProps = { ...rest, className: childClass }
     return cloneElement(child, mergedProps)
