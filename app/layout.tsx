@@ -28,23 +28,29 @@ export const metadata: Metadata = {
     'Formação online com a psicóloga e neuropsicóloga Shirlei de Vargas Saldanha para professoras da Educação Infantil: aprenda a identificar sinais de alerta no desenvolvimento infantil com segurança. Dias 03 e 04 de agosto.',
   generator: 'v0.app',
   icons: {
+    // Browsers/cache-friendly
     icon: [
       {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
+        url: '/favicon.png',
+        sizes: 'any',
       },
       {
         url: '/icon.svg',
         type: 'image/svg+xml',
+        sizes: 'any',
       },
     ],
-    apple: '/apple-icon.png',
+    apple: {
+      url: '/favicon.png',
+      sizes: 'any',
+    },
+    shortcut: {
+      url: '/favicon.png',
+      sizes: 'any',
+    },
   },
 }
+
 
 export const viewport: Viewport = {
   colorScheme: 'light',
