@@ -1,6 +1,6 @@
 import Image from "next/image"
 
-vexport function SiteFooter() {
+export function SiteFooter() {
   return (
     <footer className="border-t border-border bg-background">
       <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-6 px-5 py-10 text-center sm:px-8 md:flex-row md:text-left">
