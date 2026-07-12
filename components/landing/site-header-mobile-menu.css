@@ -1,0 +1,23 @@
+.menu-mobile {
+    display: flex;
+    overflow-x: auto;
+    gap: 8px;
+    padding: 10px 0;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+}
+
+.menu-mobile::-webkit-scrollbar {
+    display: none
+}
+
+.menu-mobile a {
+    flex-shrink: 0;
+    font-size: 0.85rem;
+    padding: 8px 16px;
+    border-radius: 9999px;
+    text-decoration: none;
+    background: #FFF0E8;
+    color: #5A5856;
+}
