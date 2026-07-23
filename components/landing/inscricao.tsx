@@ -45,7 +45,7 @@ export function Inscricao() {
                 motivacao: values.motivacao,
             }
 
-            // Enviar requisição para a API
+            // Enviar para API (servidor salva planilha + envia notificação WhatsApp automático)
             try {
                 await fetch(submitUrl, {
                     method: "POST",
@@ -56,22 +56,7 @@ export function Inscricao() {
                 // Ignora erro da API, segue o fluxo
             }
 
-            // Enviar via WhatsApp (notificação para admin)
-            const whatsappNumber = "555199128542" // formato internacional sem + e sem espaços: 55 + DDD + número
-            const message = [
-                "Nova inscrição — Olhares que Transformam",
-                `Nome: ${values.name}`,
-                `E-mail: ${values.email}`,
-                `WhatsApp: ${values.whatsapp || "(não informado)"}`,
-                `CPF: ${values.cpf}`,
-                `Profissão: ${values.profissao || "(não informada)"}`,
-                `Cidade: ${values.cidade || "(não informada)"}`,
-                `Motivação: ${values.motivacao || "(não informada)"}`,
-            ].join("\n")
-
-            const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`
-            window.open(url, "_blank", "noopener,noreferrer")
-
+            // Vai direto para tela de sucesso — sem abrir janela no navegador
             setStatus("ok")
             setValues({ name: "", email: "", whatsapp: "", cpf: "", profissao: "", cidade: "", motivacao: "" })
         } catch (err) {
@@ -79,7 +64,7 @@ export function Inscricao() {
         }
     }
 
-    // Estado de sucesso — mostra mensagem de agradecimento e botão do grupo
+
     if (status === "ok") {
         return (
             <section id="inscricao" className="border-t border-border bg-background">
@@ -153,11 +138,12 @@ export function Inscricao() {
 
                     <div className="mt-4 flex items-center gap-3">
                         <Button type="submit">Enviar inscrição</Button>
-                        {status === "sending" && <span className="text-sm text-muted-foreground">Abrindo WhatsApp...</span>}
-                        {status && status.toString().startsWith("error") && <span className="text-sm text-destructive">Erro ao abrir o WhatsApp</span>}
+                        {status === "sending" && <span className="text-sm text-muted-foreground">Enviando...</span>}
+                        {status && status.toString().startsWith("error") && <span className="text-sm text-destructive">Erro ao enviar</span>}
                     </div>
                 </form>
             </div>
         </section>
     )
 }
+
